@@ -127,81 +127,89 @@ int main(int argc, char *argv[]){
     struct stat file_stat;
     pid_t pid_switch, process_forcfile;
     if(argc < 2 ){
-        printf("Not enough arguments");
+        printf("Not enough arguments\n");
         return EXIT_FAILURE;
-    }else{
-    for( int  i = 1; i < argc ;i++){
-    lstat(argv[i],&file_stat);
-    if(S_ISREG(file_stat.st_mode))
+    }else
     {
-        char c;
-        printf("The file  ' %s ' is a regular file\n",argv[i]);
-        printf("\nA) Regular file\n -n (file name) \n -d (dim/size) \n -h (number of hard links \n -m (time of last modif) \n -a (acces rights) \n -l (create a symbolic link)\n");
+        for( int  i = 1; i < argc ;i++){
+            lstat(argv[i],&file_stat);
+            if(S_ISREG(file_stat.st_mode))
+        {
+            char c;
+            printf("The file  ' %s ' is a regular file\n",argv[i]);
+            printf("\nA) Regular file\n -n (file name) \n -d (dim/size) \n -h (number of hard links \n -m (time of last modif) \n -a (acces rights) \n -l (create a symbolic link)\n");
         
         if(check_c_files_regularfile(argv[i]) == 1){
-        process_forcfile = fork();
-        if(process_forcfile< 0 ){
-            perror("Process for regular file didn t start");
+            process_forcfile = fork();
+            if(process_forcfile< 0 ){
+                perror("Process for regular file didn t start");
         }else if( process_forcfile== 0){
             execlp("./script.sh","./script.sh",argv[i],NULL);
-             exit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         }
         }
        
         scanf(" %c",&c);
         pid_switch = fork();
         if(pid_switch < 0){
-            perror("Didn t start");
-        }else if(pid_switch == 0){
+            perror("Didn't start");
+        }else if(pid_switch == 0)
+        {
+            if((check_c_files_regularfile(argv[i])) == 0 )
+            {
+                execlp("./nr_of_lines.sh","./nr_of_lines.sh",argv[i],NULL);
+            }
         switch (c)
         {
-        case 'n':printf("File name:%s\n",argv[i]);break;
-        case 'd':printf("The size of the file is %ld\n",file_stat.st_size);break;
-        case 'h':printf("The number of hard links is %ld\n",file_stat.st_nlink);break;
-        case 'm':printf("The time of the last modification is %lld\n",file_stat.st_mtim);break;
-        case 'a':gotoformat(file_stat);break;
-        case 'l':defineLink(argv[i]);break;
-        default:fflush(stdin);
-            printf("Not a case for a regular file");
-            break;
+            case 'n':printf("File name:%s\n",argv[i]);break;
+            case 'd':printf("The size of the file is %ld\n",file_stat.st_size);break;
+            case 'h':printf("The number of hard links is %ld\n",file_stat.st_nlink);break;
+            case 'm':printf("The time of the last modification is %lld\n",file_stat.st_mtim);break;
+            case 'a':gotoformat(file_stat);break;
+            case 'l':defineLink(argv[i]);break;
+            default:fflush(stdin);
+                printf("Not a case for a regular file");
+                break;
         }
         exit(EXIT_FAILURE);
         }
     }
-    else if(S_ISLNK(file_stat.st_mode)){
-        printf("The file ' %s ' a symbolic link\n",argv[i]);
-        char c1;
-        printf("\nB)Link\n-n Link name \n-l delete link \n-d Size of link \n-z size of target \n-a acces rights \n");
-        scanf(" %c",&c1);
-        switch(c1)
-        {
-            case 'n':printf("Link name:%s\n",argv[i]);break;
-            case 'l':unlink(argv[i]);
-                    printf("The link was deleted\n");break;
-            case 'd':printf("The size of the link is %ld\n", file_stat.st_size);break;
-            case 'z':getLinksize(argv[i]);break;
-            case 'a':gotoformat(file_stat);break;
-            default: break;
+        else if(S_ISLNK(file_stat.st_mode)){
+            printf("The file ' %s ' a symbolic link\n",argv[i]);
+            char c1;
+            printf("\nB)Link\n-n Link name \n-l delete link \n-d Size of link \n-z size of target \n-a acces rights \n");
+            scanf(" %c",&c1);
+            switch(c1)
+            {
+                case 'n':printf("Link name:%s\n",argv[i]);break;
+                case 'l':unlink(argv[i]);
+                        printf("The link was deleted\n");break;
+                case 'd':printf("The size of the link is %ld\n", file_stat.st_size);break;
+                case 'z':getLinksize(argv[i]);break;
+                case 'a':gotoformat(file_stat);break;
+                default: break;
+            }
         }
-    }
-    else if(S_ISDIR(file_stat.st_mode)){
-        printf("The file ' %s ' a directory\n",argv[i]);
-        char c2;
-        printf("\nC)Directory\n-n(file name)\n-d(dim/size)\n-a (acces rights) \n-c (total number of files with the .c extension)\n");
-        scanf(" %c",&c2);
-        switch(c2)
+        else if(S_ISDIR(file_stat.st_mode))
         {
-            case 'n':printf("Directory name:%s\n",argv[i]);break;
-            case 'd':printf("The size of the directory is %ld\n", file_stat.st_size);break;
-            case 'a':gotoformat(file_stat);break;
-            case 'c':check_c_files(argv[i]);break;
-            default:break;
+            printf("The file ' %s ' a directory\n",argv[i]);
+            char c2;
+            printf("\nC)Directory\n-n(file name)\n-d(dim/size)\n-a (acces rights) \n-c (total number of files with the .c extension)\n");
+            scanf(" %c",&c2);
+            switch(c2)
+            {
+                case 'n':printf("Directory name:%s\n",argv[i]);break;
+                case 'd':printf("The size of the directory is %ld\n", file_stat.st_size);break;
+                case 'a':gotoformat(file_stat);break;
+                case 'c':check_c_files(argv[i]);break;
+                default:break;
+            }
         }
-    }
-    else{
-        printf("The %s is not a regular/symbolic file",argv[i]);
-    }
-    }
+        else
+        {
+            printf("The %s is not a regular/symbolic file",argv[i]);
+        }
+        }
     }
 
 
